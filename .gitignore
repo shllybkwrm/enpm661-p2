@@ -3,6 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+
+# Keep VS files from being uploaded at all
+*.sln
+*.pyproj
+
 # User-specific files
 *.rsuser
 *.suo
