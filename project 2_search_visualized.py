@@ -3,7 +3,7 @@
 
 import math
 import numpy as np
-import cv2 as cv
+import cv2
 
 
 class Node:
@@ -49,12 +49,40 @@ def row_col_to_conv_coord(i,j):
 ##print("map2",map2,"u",u,"v",v)
 ###############################RUNNING CODE DURING DEVELOPMENT###########00=90
 ###############################COMMENT OUT WHEN AUTOMATED################
+height = 11
+width = 21
+
 x=2
 y=3
-map1=np.ones((11,21),dtype=int)
+
+map1=np.ones((height, width), dtype=int)
 map1[y,x]=0
-map2=np.ones((11,21),dtype=int)
+map2=np.ones((height, width), dtype=int)
 map2[5,7]=0
+
+map_img = 255*np.ones((height, width, 3), np.uint8)
+
+def draw_map(map):
+    global height, width, map_img
+    # Create a white base image to draw map onto
+    #block_size = 10
+    #map_img = 255*np.ones((height*block_size, width*block_size, 3), np.uint8)
+    # Convert dtype
+    map_img = 255*np.array(map, np.uint8)
+    # Upscale before imshow
+    scale_percent = 1000 # percent of original size
+    w = int(map_img.shape[1] * scale_percent / 100)
+    h = int(map_img.shape[0] * scale_percent / 100)
+    # resize image
+    resized = cv2.resize(map_img, (w,h), interpolation = cv2.INTER_AREA)
+    
+    cv2.imshow('Current map', resized)
+    cv2.waitKey(50)  # in ms - adjust as needed for display speed
+
+    return
+
+
+
 def get_robcoord(map):
     i,j=np.where(map ==0)
 ##    print("row and column of 0 ", np.where(map ==0))
@@ -88,7 +116,7 @@ def move_left(map):
         temp = temp_arr[i, j - 1]
         temp_arr[i,j] = temp
         temp_arr[i, j - 1] = 0
-        print(np.where(temp_arr==0))
+        #print(np.where(temp_arr==0))
         return temp_arr
 ##map=move_left(map)
 ##print("map",map,"x",x,"y",y)
@@ -252,14 +280,17 @@ def exploring_nodes(node):
     while node_q:
         current_root = node_q.pop(0)  # Pop the element 0 from the list
         if current_root.map.tolist() == goal_node.tolist():
-            print("Goal reached",current_root.map,current_root.node_no)
+            print("Goal reached!", '\n', current_root.map, current_root.node_no)
+            draw_map(current_root.map)
             return current_root, final_nodes, visited
         print("THE LENGTH OF NODE Q at the beginning IS: ", len(node_q))
 
         for move in actions:
             temp_data = get_neighbours(move, current_root.map)
-            print(move, temp_data)
+            print(move, '\n', temp_data)
             if temp_data is not None:
+                draw_map(temp_data)
+
                 node_counter += 1
                 print("node count",node_counter)
                 node_cost=20000000000000#8b
@@ -288,7 +319,7 @@ def exploring_nodes(node):
                     min_cost=min(node_cost_list)
                     for k in Dict1.keys():
                         if k==min_cost:
-                            print("Dict1[k]",Dict1[k])
+                            #print("Dict1[k]",Dict1[k])
                             node_q.remove(Dict1[k])
                             node_q.insert(0,Dict1[k])
                     print("THE LENGTH OF NODE Q (after shuffling should be the same as after children) IS: ", len(node_q))                   
@@ -321,10 +352,15 @@ REPEAT UNTIL NO MORE IN LIST 2"""
 
 
 
-
     
 
 start_node=Node(0,map1,None,None,0)
+draw_map(map1)
 goal, s, v = exploring_nodes(start_node)
 ##print(move_left(start_node.node_loc))
+
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
 
