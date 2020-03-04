@@ -52,7 +52,7 @@ map2=np.ones((11,21),dtype=int)
 map2[5,7]=0
 def get_robcoord(map):
     i,j=np.where(map ==0)
-##    print("row and culumn of 0 ", np.where(map ==0))
+##    print("row and column of 0 ", np.where(map ==0))
     x,y=row_col_to_conv_coord(i,j)
 ##    print("x and y coordinates", x,y)
     return x,y
@@ -249,7 +249,7 @@ def exploring_nodes(node):
         if current_root.map.tolist() == goal_node.tolist():
             print("Goal reached",current_root.map,current_root.node_no)
             return current_root, final_nodes, visited
-        print("THE LENGTH OF NODE Q at beggining IS: ", len(node_q))
+        print("THE LENGTH OF NODE Q at the beginning IS: ", len(node_q))
 
         for move in actions:
             temp_data = get_neighbours(move, current_root.map)
@@ -286,11 +286,11 @@ def exploring_nodes(node):
                             print("Dict1[k]",Dict1[k])
                             node_q.remove(Dict1[k])
                             node_q.insert(0,Dict1[k])
-                    print("THE LENGTH OF NODE Q after shuffling should be the same as after children IS: ", len(node_q))                   
+                    print("THE LENGTH OF NODE Q (after shuffling should be the same as after children) IS: ", len(node_q))                   
     return None, None, None  # return statement if the goal node is not reached
 
 """
-get shortes distance from start vortes to each other vortes
+get shortest distance from start vertex to each other vertex
 get the previous vertex
 3 lists
     1. List to keep track of vetexes we have visited

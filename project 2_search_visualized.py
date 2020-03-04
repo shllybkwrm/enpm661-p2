@@ -1,8 +1,10 @@
 # ENPM661, Spring 2020, Project 2
 # Shelly Bagchi & Omololu Makinde
 
-import numpy as np
 import math
+import numpy as np
+import cv2 as cv
+
 
 class Node:
     def __init__(self, node_no, map, parent, act, cost):
@@ -21,38 +23,41 @@ def row_col_to_conv_coord(i,j):
     x=int(j)
     y=int (10-i)
     return x,y
-
-def get_initial_robcoord():
-    map = np.ones((11,21),dtype=int)
-##    print(map)
-    print("Please enter the x and y coordinates of the point robot")
-    x=int(input("Enter the x coordinate "))
-    y=int(input("Enter the y coordinate "))
-    i,j=conv_coord_to_row_col(x,y)
-    map[i,j]=0
-    return x,y,map
-x,y,map1=get_initial_robcoord()
-print("map1",map1,"x",x,"y",y)
-def get_final_robcoord():
-    map = np.ones((11,21),dtype=int)
-##    print(map)
-    print("Please enter the x and y coordinates of the point robot")
-    x=int(input("Enter the x coordinate "))
-    y=int(input("Enter the y coordinate "))
-    i,j=conv_coord_to_row_col(x,y)
-    map[i,j]=0
-    return x,y,map
-u,v,map2=get_final_robcoord()
-print("map2",map2,"u",u,"v",v)
+###############################This will get X AND Y COORDINATES OF START AND FINISH POINT FROM USER###########00=90
+###############################COMMENT OUT WHEN FIXED################
+##def get_initial_robcoord():
+##    map = np.ones((11,21),dtype=int)
+####    print(map)
+##    print("Please enter the x and y coordinates of the point robot")
+##    x=int(input("Enter the x coordinate "))
+##    y=int(input("Enter the y coordinate "))
+##    i,j=conv_coord_to_row_col(x,y)
+##    map[i,j]=0
+##    return x,y,map
+##x,y,map1=get_initial_robcoord()
+##print("map1",map1,"x",x,"y",y)
+##def get_final_robcoord():
+##    map = np.ones((11,21),dtype=int)
+####    print(map)
+##    print("Please enter the x and y coordinates of the point robot")
+##    x=int(input("Enter the x coordinate "))
+##    y=int(input("Enter the y coordinate "))
+##    i,j=conv_coord_to_row_col(x,y)
+##    map[i,j]=0
+##    return x,y,map
+##u,v,map2=get_final_robcoord()
+##print("map2",map2,"u",u,"v",v)
 ###############################RUNNING CODE DURING DEVELOPMENT###########00=90
 ###############################COMMENT OUT WHEN AUTOMATED################
-##x=2
-##y=3
-##map=np.ones((10,20),dtype=int)
-##map[y,x]=0
+x=2
+y=3
+map1=np.ones((11,21),dtype=int)
+map1[y,x]=0
+map2=np.ones((11,21),dtype=int)
+map2[5,7]=0
 def get_robcoord(map):
     i,j=np.where(map ==0)
-##    print("row and culumn of 0 ", np.where(map ==0))
+##    print("row and column of 0 ", np.where(map ==0))
     x,y=row_col_to_conv_coord(i,j)
 ##    print("x and y coordinates", x,y)
     return x,y
@@ -186,28 +191,28 @@ def move_right_down_diag(map):
 ####
 def get_neighbours(action,map):
     if action == 'up':
-        print(map)
+##        print(map)
         return move_up(map)
     if action == 'down':
-        print(map)
+##        print(map)
         return move_down(map)
     if action == 'left':
-        print(map)
+##        print(map)
         return move_left(map)
     if action == 'right':
-        print(map)
+##        print(map)
         return move_right(map)
     if action == 'down_right':
-        print(map)
+##        print(map)
         return move_right_down_diag(map)
     if action == 'up_right':
-        print(map)
+##        print(map)
         return move_right_up_diag(map)
     if action == "down_left":
-        print(map)
+##        print(map)
         return move_left_down_diag(map)
     if action == "up_left":
-        print(map)
+##        print(map)
         return move_left_up_diag(map)        
     else:
         return None
@@ -219,10 +224,10 @@ def get_neighbours(action,map):
 def get_distance(map1,map2):
     p1 = []
     p1.extend(get_robcoord(map1))
-    print(p1,type(p1))
+##    print(p1,type(p1))
     p2=[]
     p2.extend(get_robcoord(map2))
-    print(p2,type(p2))
+##    print(p2,type(p2))
     distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
     return distance
 
@@ -234,34 +239,59 @@ def get_distance(map1,map2):
 def exploring_nodes(node):
     print("Exploring Nodes")
     actions = ["down", "up", "left", "right","down_right", "up_right", "down_left", "up_left"]
-    a,b,goal_node = get_final_robcoord()
+    goal_node = map2
     node_q = [node]
     final_nodes = []
     visited = []
+    node_cost_list=[] #13
+    
     final_nodes.append(node_q[0].map.tolist())  # Only writing data of nodes in seen
     node_counter = 0  # To define a unique ID to all the nodes formed
 
+##    for i in range(2):#while node_q:  # UNCOMMENT FOR DEBUGGING 
     while node_q:
         current_root = node_q.pop(0)  # Pop the element 0 from the list
         if current_root.map.tolist() == goal_node.tolist():
-            print("Goal reached")
+            print("Goal reached",current_root.map,current_root.node_no)
             return current_root, final_nodes, visited
+        print("THE LENGTH OF NODE Q at the beginning IS: ", len(node_q))
 
         for move in actions:
             temp_data = get_neighbours(move, current_root.map)
             print(move, temp_data)
             if temp_data is not None:
                 node_counter += 1
-                current_root.cost=get_distance(temp_data,current_root.map)
-                child_node = Node(node_counter, np.array(temp_data), current_root, move, 0)  # Create a child node
+                print("node count",node_counter)
+                node_cost=20000000000000#8b
+                move_cost=get_distance(temp_data,current_root.map)
+                print("move cost", move_cost)
+                cost_to_come= current_root.cost + move_cost#8c
+##                print("cost to come", cost_to_comeself.map = map
+                child_node = Node(node_counter, np.array(temp_data), current_root, move, node_cost)  # 9
+##                print("node_counter", node_counter,"child node point",child_node.map,"parent",child_node.parent,"move",child_node.act,"cost",child_node.cost)
+                if node_cost > cost_to_come : #9a
+                    child_node.cost= cost_to_come# 9b
+                    Dict1={child_node.cost:child_node}
+                    for k in Dict1.keys():
+                        pass#print("k",k)
+                    for i in Dict1.values():
+                        pass#print("i",i)
+##                print("node_counter", node_counter,"child node point",child_node.map,"parent",child_node.parent,"move",child_node.act,"cost",child_node.cost)
 
-                if child_node.map.tolist() not in final_nodes:  # Add the child node data in final node list
-                    node_q.append(child_node)
-                    final_nodes.append(child_node.map.tolist())
-                    visited.append(child_node)
-                    if child_node.map.tolist() == goal_node.tolist():
-                        print("Goal_reached")
-                        return child_node, final_nodes, visited
+                if child_node.map.tolist() not in final_nodes:  # 10
+                    node_q.append(child_node)#12
+                    print("THE LENGTH OF NODE Q after children IS: ", len(node_q))
+                    final_nodes.append(child_node.map.tolist())#10a
+##                    print(final_nodes)
+                    visited.append(child_node)#11
+                    node_cost_list.append(child_node.cost)
+                    min_cost=min(node_cost_list)
+                    for k in Dict1.keys():
+                        if k==min_cost:
+                            print("Dict1[k]",Dict1[k])
+                            node_q.remove(Dict1[k])
+                            node_q.insert(0,Dict1[k])
+                    print("THE LENGTH OF NODE Q (after shuffling should be the same as after children) IS: ", len(node_q))                   
     return None, None, None  # return statement if the goal node is not reached
 
 """
