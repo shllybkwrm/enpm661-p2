@@ -91,6 +91,8 @@ def get_robcoord(map):
     return x,y
 ##x,y=get_robcoord(map)
 
+
+#  FIX THIS
 def check_location(map):
     x,y=get_robcoord(map)
 ##    robcoord=[]
