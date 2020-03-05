@@ -1,9 +1,13 @@
-import numpy as np
+# ENPM661, Spring 2020, Project 2
+# Shelly Bagchi & Omololu Makinde
+
 import math
+import numpy as np
+import cv2
 
 
-x=np.linspace(0,300,301,dtype=int)
-y=np.linspace(200,0,201,dtype=int)
+x=np.linspace(0,299,300,dtype=int)
+y=np.linspace(199,0,200,dtype=int)
 x_1,y_1=np.meshgrid(x,y)
 ##a,b,d,e=7.5-x_1,x_1-7.5,10-x_1,x_1-2
 ######################################OBSTACLE 1#############################################################
@@ -43,29 +47,44 @@ print(x_1)
 print("y_1 = ") 
 print(y_1) 
 
-textfile1=open("visualize.txt", "a")
+textfile1=open("visualize.txt", "w")
+np.set_printoptions(threshold=np.inf)
 textfile1.write(str(mask2))
 textfile1.close()
 
 
+print(mask2.shape)
 
 
+height = mask2.shape[0]
+width = mask2.shape[1]
+# Create a white base image to draw map onto
 map_img = 255*np.ones((height, width, 3), np.uint8)
 
 def draw_map(map):
     global height, width, map_img
-    # Create a white base image to draw map onto
-    #block_size = 10
-    #map_img = 255*np.ones((height*block_size, width*block_size, 3), np.uint8)
-    # Convert dtype
-    map_img = 255*np.array(map, np.uint8)
+
+    # Convert dtype - only works for 0s & 1s
+    #map_img = 255*np.array(map, np.uint8)
+
+    #map_img = 255*np.ones((height, width, 3), np.uint8)
+    for (i,row) in enumerate(map):
+        for (j,value) in enumerate(row):
+            if value==0:
+                map_img[i,j] = np.array([0,0,255], np.uint8);
+            elif value>5:
+                map_img[i,j] = np.array([0,0,0], np.uint8);
+
+
+
     # Upscale before imshow
-    scale_percent = 1000 # percent of original size
+    scale_percent = 200  # percent of original size
     w = int(map_img.shape[1] * scale_percent / 100)
     h = int(map_img.shape[0] * scale_percent / 100)
     # resize image
     resized = cv2.resize(map_img, (w,h), interpolation = cv2.INTER_AREA)
     
+
     cv2.imshow('Current map', resized)
     cv2.waitKey(50)  # in ms - adjust as needed for display speed
 
@@ -73,3 +92,9 @@ def draw_map(map):
 
 
 draw_map(mask2)
+
+
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
