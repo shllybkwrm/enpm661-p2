@@ -7,8 +7,6 @@ import cv2
 
 
 
-
-
 height = 200 #mask2.shape[0]
 width  = 300 #mask2.shape[1]
 # Create a white base image to draw map onto
