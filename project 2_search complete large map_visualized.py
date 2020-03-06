@@ -367,11 +367,11 @@ def exploring_nodes(node):
             draw_map(current_root.map)
 
             return child_node, final_nodes, visited
-        print("THE LENGTH OF NODE Q at beggining IS: ", len(node_q))
+        print("THE LENGTH OF NODE Q at beginning IS: ", len(node_q))
 
         for move in actions:
             temp_data = get_neighbours(move, current_root.map)
-            print(move, temp_data)
+            print(move, '\n', temp_data)
             if temp_data is not None:
                 draw_map(temp_data)
 
@@ -420,10 +420,10 @@ def path(node):  # To find the path from the goal node to the starting node
 
 
 """
-get shortes distance from start vortes to each other vortes
+get shortest distance from start vertex to each other vertex
 get the previous vertex
 3 lists
-    1. List to keep track of vetexes we have visited
+    1. List to keep track of vertexes we have visited
     2. List of vertexes we haven't visited
     3. Distance between visited nodes and start node
 Set the value for the distance from start node to start node as zero
