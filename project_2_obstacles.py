@@ -57,18 +57,29 @@ def draw_obstacles():
     rect = ((95, height-30-10), (-75, -10), 30)
     box = np.int0(cv2.boxPoints(rect))
     cv2.drawContours(map_img, [box], 0, (0,0,0), thickness=1)#cv2.FILLED)
-    #cv2.rectangle(img=map_img, pt1=(95-75, height-30-10), pt2=(95, height-30), color=(0,0,0), thickness=1)#cv2.FILLED)
+    #cv2.rectangle(map_img, pt1=(95-75, height-30-10), pt2=(95, height-30), color=(0,0,0), thickness=1)#cv2.FILLED)
     #map_img = cv2.rotate(map_img, 30)
 
-    cv2.circle(img=map_img, center=(width-50,50), radius=25, color=(0,0,0), thickness=1)
-    cv2.ellipse(img=map_img, center=(width//2,height//2), axes=(40,20), angle=0, startAngle=0, endAngle=360, color=(0,0,0), thickness=1)
-    # Starting at top left pt
-    cv2.line(img=map_img, pt1=(25, height-185), pt2=(75, height-185), color=(0,0,0), thickness=1)
-    cv2.line(img=map_img, pt1=(75, height-185), pt2=(100,height-150), color=(0,0,0), thickness=1)
-    cv2.line(img=map_img, pt1=(100,height-150), pt2=(75, height-120), color=(0,0,0), thickness=1)
-    cv2.line(img=map_img, pt1=(75, height-120), pt2=(50, height-150), color=(0,0,0), thickness=1)
-    cv2.line(img=map_img, pt1=(50, height-150), pt2=(20, height-120), color=(0,0,0), thickness=1)
-    cv2.line(img=map_img, pt1=(20, height-120), pt2=(25, height-185), color=(0,0,0), thickness=1)
+    cv2.circle(map_img, center=(width-50,50), radius=25, color=(0,0,0), thickness=1)
+    cv2.ellipse(map_img, center=(width//2,height//2), axes=(40,20), angle=0, startAngle=0, endAngle=360, color=(0,0,0), thickness=1)
+    # Top left object
+    pts1 = np.array([[25, height-185], [75, height-185], [100,height-150], [75, height-120], [50, height-150] , [20, height-120]])
+    pts1 = pts1.reshape((-1,1,2))
+    cv2.polylines(map_img, [pts1], isClosed=True, color=(0,0,0), thickness=1)
+    #cv2.line(img=map_img, pt1=(25, height-185), pt2=(75, height-185), color=(0,0,0), thickness=1)
+    #cv2.line(img=map_img, pt1=(75, height-185), pt2=(100,height-150), color=(0,0,0), thickness=1)
+    #cv2.line(img=map_img, pt1=(100,height-150), pt2=(75, height-120), color=(0,0,0), thickness=1)
+    #cv2.line(img=map_img, pt1=(75, height-120), pt2=(50, height-150), color=(0,0,0), thickness=1)
+    #cv2.line(img=map_img, pt1=(50, height-150), pt2=(20, height-120), color=(0,0,0), thickness=1)
+    #cv2.line(img=map_img, pt1=(20, height-120), pt2=(25, height-185), color=(0,0,0), thickness=1)
+    # Diamond
+    pts2 = np.array([[width-100, height-25], [width-75, height-40], [width-50, height-25], [width-75, height-10]])
+    pts2 = pts2.reshape((-1,1,2))
+    cv2.polylines(map_img, [pts2], isClosed=True, color=(0,0,0), thickness=1)
+
+
+    # Convert to grayscale to flatten
+    map_img = cv2.cvtColor(map_img, cv2.COLOR_BGR2GRAY)
 
 
     # Upscale before displaying
@@ -123,6 +134,7 @@ mask2=(triangle1) + (triangle2)+(triangle3)+(star)+circle#+elipse
 ##upper_triangl=np.where((
 print("mask2 = ")
 print(mask2)
+print(mask2.shape)
 print("x_1 = ") 
 print(x_1) 
 print("y_1 = ") 
@@ -133,11 +145,11 @@ np.set_printoptions(threshold=np.inf)
 #textfile1.write(str(mask2))
 #textfile1.close()
 
-print(mask2.shape)
 
 
 #draw_map(mask2)
 map_img = draw_obstacles()
+print(map_img.shape)
 
 
 textfile1.write(str(map_img))
