@@ -38,7 +38,7 @@ def draw_map(map):
     
 
     cv2.imshow('Current map', resized)
-    cv2.waitKey(5)  # in ms - adjust as needed for display speed
+    cv2.waitKey(1)  # in ms - adjust as needed for display speed
 
     return current_map
 
@@ -153,9 +153,9 @@ map2[5,7]=0
 
 def get_robcoord(map):
     i,j=np.where(map ==0)
-    print("row and column of 0 ", np.where(map==0))
+##    print("row and column of 0 ", np.where(map==0))
     x,y=row_col_to_conv_coord(i,j)
-    print("x and y coordinates", x,y)
+##    print("x and y coordinates", x,y)
     return x,y
 ##x,y=get_robcoord(map)
 
