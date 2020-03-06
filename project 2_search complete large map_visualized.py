@@ -140,12 +140,13 @@ x=21
 y=125
 #map1=np.ones((height,width),dtype=int)
 map1 = draw_obstacles()
+map1[y,x]=0
+
 textfile1=open("visualize.txt", "w")
 np.set_printoptions(threshold=np.inf)
 textfile1.write(str(map1))
 textfile1.close()
 
-map1[y,x]=0
 map2=np.ones((height,width),dtype=int)
 map2[5,7]=0
 
