@@ -422,7 +422,7 @@ def exploring_nodes(node):
             draw_map(current_root.map)
 
             return child_node, final_nodes, visited
-        print("THE LENGTH OF NODE Q at beginning IS: ", len(node_q))
+        #print("THE LENGTH OF NODE Q at beginning IS: ", len(node_q))
 
         for move in actions:
             temp_data = get_neighbours(move, current_root.map)
@@ -431,10 +431,10 @@ def exploring_nodes(node):
                 #draw_map(temp_data)  # don't draw here - not technically visited yet
 
                 node_counter += 1
-                print("node count",node_counter)
+                #print("node count",node_counter)
                 node_cost=20000000000000#8b
                 move_cost=get_distance(temp_data,current_root.map)
-                print("move cost", move_cost)
+                #print("move cost", move_cost)
                 cost_to_come= current_root.cost + move_cost#8c
 ##                print("cost to come", cost_to_comeself.map = map
                 child_node = Node(node_counter, np.array(temp_data), current_root, move, node_cost)  # 9
@@ -452,7 +452,7 @@ def exploring_nodes(node):
                     draw_map(child_node.map)
 
                     node_q.append(child_node)#12
-                    print("THE LENGTH OF NODE Q after children IS: ", len(node_q))
+                    #print("THE LENGTH OF NODE Q after children IS: ", len(node_q))
                     final_nodes.append(child_node.map.tolist())#10a
 ##                    print(final_nodes)
                     visited.append(child_node)#11
@@ -463,7 +463,7 @@ def exploring_nodes(node):
                             print("Dict1[k]",Dict1[k])
                             node_q.remove(Dict1[k])
                             node_q.insert(0,Dict1[k])
-                    print("THE LENGTH OF NODE Q after shuffling (should be the same as after children) IS: ", len(node_q))                   
+                    #print("THE LENGTH OF NODE Q after shuffling (should be the same as after children) IS: ", len(node_q))                   
     return None, None, None  # return statement if the goal node is not reached
 
 def path(node):  # To find the path from the goal node to the starting node

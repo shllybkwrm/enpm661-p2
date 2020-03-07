@@ -131,8 +131,8 @@ def get_initial_robcoord():
     map = draw_obstacles()
 ##    print(map)
     print("Please enter the x and y coordinates of the point robot.")
-    x=(input("Enter the x coordinate (default=60): "))
-    if x=='':  x=60
+    x=(input("Enter the x coordinate (default=65): "))
+    if x=='':  x=65
     else:  x=int(x)
     y=(input("Enter the y coordinate (default=125): "))
     if y=='':  y=125
@@ -146,14 +146,15 @@ x,y,map1=get_initial_robcoord()
 print("map1",map1,"x",x,"y",y)
 
 def get_final_robcoord():
-    map = np.ones((height,width),dtype=int)
+    #map = np.ones((height,width),dtype=int)
+    map = draw_obstacles()
 ##    print(map)
     print("Please enter the x and y coordinates of the robot's goal.")
-    x=(input("Enter the x coordinate (default=90): "))
-    if x=='':  x=90
+    x=(input("Enter the x coordinate (default=85): "))
+    if x=='':  x=85
     else:  x=int(x)
     y=(input("Enter the y coordinate (default=125): "))
-    if y=='':  y=125
+    if y=='':  y=120
     else:  y=int(y)
     i,j=conv_coord_to_row_col(x,y)
     map[i,j]=0
