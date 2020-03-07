@@ -143,7 +143,7 @@ def get_initial_robcoord():
     current_map[i,j] = [255,0,0]
     return x,y,map
 x,y,map1=get_initial_robcoord()
-print("map1",map1,"x",x,"y",y)
+print("map1\n",map1,"\nx",x,"y",y)
 
 def get_final_robcoord():
     #map = np.ones((height,width),dtype=int)
@@ -153,7 +153,7 @@ def get_final_robcoord():
     x=(input("Enter the x coordinate (default=85): "))
     if x=='':  x=85
     else:  x=int(x)
-    y=(input("Enter the y coordinate (default=125): "))
+    y=(input("Enter the y coordinate (default=120): "))
     if y=='':  y=120
     else:  y=int(y)
     i,j=conv_coord_to_row_col(x,y)
@@ -162,7 +162,7 @@ def get_final_robcoord():
     current_map[i,j] = [0,0,255]
     return x,y,map
 u,v,map2=get_final_robcoord()
-print("map2",map2,"u",u,"v",v)
+print("map2\n",map2,"\nu",u,"v",v)
 ###############################RUNNING CODE DURING DEVELOPMENT###########
 ###############################COMMENT OUT WHEN AUTOMATED################
 
@@ -177,9 +177,9 @@ print("map2",map2,"u",u,"v",v)
 
 textfile1=open("visualize.txt", "w")
 np.set_printoptions(threshold=np.inf)
-textfile1.write("MAP 1")
+textfile1.write("MAP 1\n")
 textfile1.write(str(map1))
-textfile1.write("MAP 2")
+textfile1.write("\nMAP 2\n")
 textfile1.write(str(map2))
 textfile1.close()
 
@@ -215,7 +215,7 @@ def move_left(map):
     if j == 0:
         return None
     else:
-        temp_arr = np.copy(map)
+        temp_arr = map.copy()
         temp = temp_arr[i, j - 1]
         temp_arr[i,j] = temp
         temp_arr[i, j - 1] = 0
@@ -231,7 +231,7 @@ def move_right(map):
     if j == height-1:
         return None
     else:
-        temp_arr = np.copy(map)
+        temp_arr = map.copy()
         temp = temp_arr[i, j + 1]
         temp_arr[i,j] = temp
         temp_arr[i, j +1] = 0
@@ -246,7 +246,7 @@ def move_up(map):
     if i == 0:
         return None
     else:
-        temp_arr = np.copy(map)
+        temp_arr = map.copy()
         temp = temp_arr[i-1, j]
         temp_arr[i,j] = temp
         temp_arr[i-1, j] = 0
@@ -261,7 +261,7 @@ def move_down(map):
     if i == width-1:
         return None
     else:
-        temp_arr = np.copy(map)
+        temp_arr = map.copy()
         temp = temp_arr[i+1, j]
         temp_arr[i,j] = temp
         temp_arr[i+1, j] = 0
@@ -276,7 +276,7 @@ def move_left_up_diag(map):
     if i==0 or j == 0:
         return None
     else:
-        temp_arr = np.copy(map)
+        temp_arr = map.copy()
         temp = temp_arr[i-1, j-1]
         temp_arr[i,j] = temp
         temp_arr[i-1, j-1] = 0
@@ -292,7 +292,7 @@ def move_left_down_diag(map):
     if i == width-1 or j==0:
         return None
     else:
-        temp_arr = np.copy(map)
+        temp_arr = map.copy()
         temp = temp_arr[i+1, j-1]
         temp_arr[i,j] = temp
         temp_arr[i+1, j-1] = 0
@@ -308,7 +308,7 @@ def move_right_up_diag(map):
     if i==0 or j == height-1:
         return None
     else:
-        temp_arr = np.copy(map)
+        temp_arr = map.copy()
         temp = temp_arr[i-1, j+1]
         temp_arr[i,j] = temp
         temp_arr[i-1, j+1] = 0
@@ -324,7 +324,7 @@ def move_right_down_diag(map):
     if j == 0:
         return None
     else:
-        temp_arr = np.copy(map)
+        temp_arr = map.copy()
         temp = temp_arr[i+1, j+1]
         temp_arr[i,j] = temp
         temp_arr[i+1, j+1] = 0
@@ -387,6 +387,7 @@ def exploring_nodes(node):
     print("Exploring Nodes")
     actions = ["down", "up", "left", "right","down_right", "up_right", "down_left", "up_left"]
     goal_node = map2
+    goal_i,goal_j = np.where(map2==0)
     node_q = [node]
     final_nodes = []
     visited = []
@@ -398,7 +399,8 @@ def exploring_nodes(node):
 ##    for i in range(2):#while node_q:  # UNCOMMENT FOR DEBUGGING 
     while node_q:
         current_root = node_q.pop(0)  # Pop the element 0 from the list
-        if current_root.map.tolist() == goal_node.tolist():
+        i,j = np.where(current_root.map==0)
+        if i==goal_i and j==goal_j:
             print("Goal reached!", '\n', current_root.map, current_root.node_no)
             draw_map(current_root.map)
 
