@@ -11,12 +11,27 @@ width  = 300 #mask2.shape[1]
 # Create a white base image to draw map onto
 current_map = 255*np.ones((height, width, 3), np.uint8)
 # Create constant for obstacle color
-OBS = 84  # 1/3 gray
+OBJ = 84  # 1/3 gray
+
+
+def display(img, title="", scale=250):
+    
+    # Upscale before displaying
+    #scale = 250  # percent of original size
+    w = int(current_map.shape[1] * scale / 100)
+    h = int(current_map.shape[0] * scale / 100)
+    # resize image
+    resized = cv2.resize(current_map, (w,h), interpolation = cv2.INTER_AREA)
+    
+
+    cv2.imshow(title, resized)
+    cv2.waitKey(1)  # in ms - adjust as needed for display speed
+
+    return;
 
 
 # Function for drawing current state of map
 def draw_map(map):
-    global height, width, current_map
 
     # Convert to grayscale to flatten
     gray = cv2.cvtColor(current_map, cv2.COLOR_BGR2GRAY)
@@ -34,26 +49,18 @@ def draw_map(map):
             #elif value<255:
             #    current_map[i,j] = np.array([128,128,128], np.uint8);
 
+    display(current_map, "Current map")
 
-    # Upscale before displaying
-    scale_percent = 200  # percent of original size
-    w = int(current_map.shape[1] * scale_percent / 100)
-    h = int(current_map.shape[0] * scale_percent / 100)
-    # resize image
-    resized = cv2.resize(current_map, (w,h), interpolation = cv2.INTER_AREA)
-    
+    return current_map
 
-    cv2.imshow('Current map', resized)
-    cv2.waitKey(1)  # in ms - adjust as needed for display speed
 
-    return cv2.cvtColor(current_map, cv2.COLOR_BGR2GRAY)
 
 # New function for using OpenCV built-in drawing functions
 def draw_obstacles():
-    global height, width, current_map
+    global current_map
     map_img = current_map.copy()
 
-    obstacle_color = (OBS,OBS,OBS)
+    obstacle_color = (OBJ,OBJ,OBJ)
 
     # Convert dtype - only works for 0s & 1s
     #map_img = 255*np.array(map, np.uint8)
@@ -83,7 +90,7 @@ def draw_obstacles():
 
     '''
     # Upscale before displaying
-    scale_percent = 200  # percent of original size
+    scale_percent = 250  # percent of original size
     w = int(map_img.shape[1] * scale_percent / 100)
     h = int(map_img.shape[0] * scale_percent / 100)
     # resize image
@@ -132,23 +139,26 @@ def get_initial_robcoord():
     else:  y=int(y)
     i,j=conv_coord_to_row_col(x,y)
     map[i,j]=0
+    # Color start blue for visualization
+    current_map[i,j] = [255,0,0]
     return x,y,map
 x,y,map1=get_initial_robcoord()
 print("map1",map1,"x",x,"y",y)
 
 def get_final_robcoord():
     map = np.ones((height,width),dtype=int)
-    #map = draw_obstacles()
 ##    print(map)
     print("Please enter the x and y coordinates of the robot's goal.")
     x=(input("Enter the x coordinate (default=150): "))
     if x=='':  x=150
     else:  x=int(x)
-    y=(input("Enter the y coordinate (default=100): "))
-    if y=='':  y=100
+    y=(input("Enter the y coordinate (default=150): "))
+    if y=='':  y=150
     else:  y=int(y)
     i,j=conv_coord_to_row_col(x,y)
     map[i,j]=0
+    # Color goal red for visualization
+    current_map[i,j] = [0,0,255]
     return x,y,map
 u,v,map2=get_final_robcoord()
 print("map2",map2,"u",u,"v",v)
@@ -174,7 +184,7 @@ textfile1.close()
 
 
 def get_robcoord(map):
-    i,j=np.where(map ==0)
+    i,j=np.where(map==0)
 ##    print("row and column of 0 ", np.where(map==0))
     x,y=row_col_to_conv_coord(i,j)
 ##    print("x and y coordinates", x,y)
@@ -189,7 +199,7 @@ def check_location(map):
         return True
     if (x-16)**2+(y-5)**2 < 1.5**2:
         return True
-    if map[x,y]==OBS:  # NEW - check for obstacle
+    if map[x,y]==OBJ:  # NEW - check for obstacle
         return True
     else:
 ##        robcoord=[x,y]
@@ -397,7 +407,7 @@ def exploring_nodes(node):
             temp_data = get_neighbours(move, current_root.map)
             print(move, '\n', temp_data)
             if temp_data is not None:
-                draw_map(temp_data)
+                #draw_map(temp_data)  # don't draw here!
 
                 node_counter += 1
                 print("node count",node_counter)
@@ -408,16 +418,18 @@ def exploring_nodes(node):
 ##                print("cost to come", cost_to_comeself.map = map
                 child_node = Node(node_counter, np.array(temp_data), current_root, move, node_cost)  # 9
 ##                print("node_counter", node_counter,"child node point",child_node.map,"parent",child_node.parent,"move",child_node.act,"cost",child_node.cost)
-                if node_cost > cost_to_come : #9a
-                    child_node.cost= cost_to_come# 9b
+                if node_cost > cost_to_come: #9a
+                    child_node.cost = cost_to_come  # 9b
                     Dict1={child_node.cost:child_node}
-                    for k in Dict1.keys():
-                        pass#print("k",k)
-                    for i in Dict1.values():
-                        pass#print("i",i)
+                    #for k in Dict1.keys():
+                    #    pass#print("k",k)
+                    #for i in Dict1.values():
+                    #    pass#print("i",i)
 ##                print("node_counter", node_counter,"child node point",child_node.map,"parent",child_node.parent,"move",child_node.act,"cost",child_node.cost)
 
                 if child_node.map.tolist() not in final_nodes:  # 10
+                    draw_map(child_node.map)
+
                     node_q.append(child_node)#12
                     print("THE LENGTH OF NODE Q after children IS: ", len(node_q))
                     final_nodes.append(child_node.map.tolist())#10a
@@ -439,7 +451,12 @@ def path(node):  # To find the path from the goal node to the starting node
     parent_node = node.parent
     while parent_node is not None:
         p.append(parent_node)
+        i,j=np.where(parent_node.map==0)
+        current_map[i,j] = [0,255,0]
         parent_node = parent_node.parent
+
+    
+    display(current_map, "Final map")
     return list(reversed(p))
 
 
