@@ -4,6 +4,7 @@
 import math
 import numpy as np
 import cv2
+import time
 
 
 height = 200 #mask2.shape[0]
@@ -151,8 +152,8 @@ def get_initial_robcoord():
     if clearance=='':  clearance=radius
     else:  clearance=int(clearance)
     print("Please enter the x and y coordinates of the point robot.")
-    x=(input("Enter the x coordinate (default=60): "))
-    if x=='':  x=60
+    x=(input("Enter the x coordinate (default=65): "))
+    if x=='':  x=65
     else:  x=int(x)
     y=(input("Enter the y coordinate (default=125): "))
     if y=='':  y=125
@@ -163,17 +164,18 @@ def get_initial_robcoord():
     current_map[i,j] = [255,0,0]
     return x,y,map
 x,y,map1=get_initial_robcoord()
-print("map1",map1,"x",x,"y",y)
+print("map1\n",map1,"\nx",x,"y",y)
 
 def get_final_robcoord():
-    map = np.ones((height,width),dtype=int)
+    #map = np.ones((height,width),dtype=int)
+    map = draw_obstacles()
 ##    print(map)
     print("Please enter the x and y coordinates of the robot's goal.")
-    x=(input("Enter the x coordinate (default=90): "))
-    if x=='':  x=90
+    x=(input("Enter the x coordinate (default=85): "))
+    if x=='':  x=85
     else:  x=int(x)
-    y=(input("Enter the y coordinate (default=125): "))
-    if y=='':  y=125
+    y=(input("Enter the y coordinate (default=120): "))
+    if y=='':  y=120
     else:  y=int(y)
     i,j=conv_coord_to_row_col(x,y)
     map[i,j]=0
@@ -181,7 +183,7 @@ def get_final_robcoord():
     current_map[i,j] = [0,0,255]
     return x,y,map
 u,v,map2=get_final_robcoord()
-print("map2",map2,"u",u,"v",v)
+print("map2\n",map2,"\nu",u,"v",v)
 ###############################RUNNING CODE DURING DEVELOPMENT###########
 ###############################COMMENT OUT WHEN AUTOMATED################
 
@@ -196,9 +198,9 @@ print("map2",map2,"u",u,"v",v)
 
 textfile1=open("visualize.txt", "w")
 np.set_printoptions(threshold=np.inf)
-textfile1.write("MAP 1")
+textfile1.write("MAP 1\n")
 textfile1.write(str(map1))
-textfile1.write("MAP 2")
+textfile1.write("\nMAP 2\n")
 textfile1.write(str(map2))
 textfile1.close()
 
@@ -406,6 +408,7 @@ def exploring_nodes(node):
     print("Exploring Nodes")
     actions = ["down", "up", "left", "right","down_right", "up_right", "down_left", "up_left"]
     goal_node = map2
+    goal_i,goal_j = np.where(map2==0)
     node_q = [node]
     final_nodes = []
     visited = []
@@ -417,7 +420,8 @@ def exploring_nodes(node):
 ##    for i in range(2):#while node_q:  # UNCOMMENT FOR DEBUGGING 
     while node_q:
         current_root = node_q.pop(0)  # Pop the element 0 from the list
-        if current_root.map.tolist() == goal_node.tolist():
+        i,j = np.where(current_root.map==0)
+        if i==goal_i and j==goal_j:
             print("Goal reached!", '\n', current_root.map, current_root.node_no)
             draw_map(current_root.map)
 
@@ -470,12 +474,15 @@ def path(node):  # To find the path from the goal node to the starting node
     p = []  # Empty list
     p.append(node)
     parent_node = node.parent
+    i,j=np.where(parent_node.map==0)
+    current_map[i,j] = [0,0,255]
     while parent_node is not None:
         p.append(parent_node)
         i,j=np.where(parent_node.map==0)
         current_map[i,j] = [0,255,0]
         parent_node = parent_node.parent
-
+        
+    current_map[i,j] = [255,0,0]
     
     display(current_map, "Final map")
     return list(reversed(p))
@@ -512,11 +519,17 @@ def print_states(list_final):  # To print the final states on the console
         print("Move : " + str(l.act) + "\n" + "Result : " + "\n" + str(l.map) + "\t" + "node number:" + str(l.node_no))
     
 
+ 
 
-
-
+start_time = time.time()
 start_node=Node(0,map1,None,None,0)
 goal, s, v = exploring_nodes(start_node)
 print_states(path(goal))
+end_time = time.time()
+print("Total execution time:", end_time-start_time)
 ##print(move_left(start_node.node_loc))
 
+
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()

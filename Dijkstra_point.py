@@ -454,12 +454,15 @@ def path(node):  # To find the path from the goal node to the starting node
     p = []  # Empty list
     p.append(node)
     parent_node = node.parent
+    i,j=np.where(parent_node.map==0)
+    current_map[i,j] = [0,0,255]
     while parent_node is not None:
         p.append(parent_node)
         i,j=np.where(parent_node.map==0)
         current_map[i,j] = [0,255,0]
         parent_node = parent_node.parent
-
+        
+    current_map[i,j] = [255,0,0]
     
     display(current_map, "Final map")
     return list(reversed(p))
