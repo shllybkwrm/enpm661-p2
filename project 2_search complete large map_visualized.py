@@ -20,16 +20,17 @@ def draw_map(map):
     #map_img = 255*np.array(map, np.uint8)
     #map_img = 255*np.ones((height, width, 3), np.uint8)
 
-
+    # Draw new robot
     for (i,row) in enumerate(map):
         for (j,value) in enumerate(row):
             if value==0:
+                # Draw new robot location
                 current_map[i,j] = np.array([0,0,0], np.uint8);
             #elif value<255:
             #    current_map[i,j] = np.array([128,128,128], np.uint8);
 
 
-    # Upscale before imshow
+    # Upscale before displaying
     scale_percent = 200  # percent of original size
     w = int(current_map.shape[1] * scale_percent / 100)
     h = int(current_map.shape[0] * scale_percent / 100)
@@ -55,18 +56,20 @@ def draw_obstacles():
     # Draw obstacles - remember coords are (w,h)!
     rect = ((95, height-30-10), (-75, -10), 30)
     box = np.int0(cv2.boxPoints(rect))
-    cv2.drawContours(map_img, [box], 0, obstacle_color, thickness=1)#cv2.FILLED)
+    cv2.drawContours(map_img, [box], 0, obstacle_color, thickness=cv2.FILLED)
 
-    cv2.circle(map_img, center=(width-50,50), radius=25, color=obstacle_color, thickness=1)
-    cv2.ellipse(map_img, center=(width//2,height//2), axes=(40,20), angle=0, startAngle=0, endAngle=360, color=obstacle_color, thickness=1)
+    cv2.circle(map_img, center=(width-50,50), radius=25, color=obstacle_color, thickness=cv2.FILLED)
+    cv2.ellipse(map_img, center=(width//2,height//2), axes=(40,20), angle=0, startAngle=0, endAngle=360, color=obstacle_color, thickness=cv2.FILLED)
     # Top left object
     pts1 = np.array([[25, height-185], [75, height-185], [100,height-150], [75, height-120], [50, height-150] , [20, height-120]])
     pts1 = pts1.reshape((-1,1,2))
-    cv2.polylines(map_img, [pts1], isClosed=True, color=obstacle_color, thickness=1)
+    #cv2.polylines(map_img, [pts1], isClosed=True, color=obstacle_color, thickness=1)
+    cv2.fillPoly(map_img, [pts1], color=obstacle_color)
     # Diamond
     pts2 = np.array([[width-100, height-25], [width-75, height-40], [width-50, height-25], [width-75, height-10]])
     pts2 = pts2.reshape((-1,1,2))
-    cv2.polylines(map_img, [pts2], isClosed=True, color=obstacle_color, thickness=1)
+    #cv2.polylines(map_img, [pts2], isClosed=True, color=obstacle_color, thickness=1)
+    cv2.fillPoly(map_img, [pts2], color=obstacle_color)
 
     # Copy to global
     current_map = map_img.copy()
@@ -108,47 +111,61 @@ def row_col_to_conv_coord(i,j):
     x=int(j)
     y=int (height-i)
     return x,y
+
 ###############################This will get X AND Y COORDINATES OF START AND FINISH POINT FROM USER###########00=90
 ###############################COMMENT OUT WHEN FIXED################
-##def get_initial_robcoord():
-##    map = np.ones((201,301),dtype=int)
-####    print(map)
-##    print("Please enter the x and y coordinates of the point robot")
-##    x=int(input("Enter the x coordinate "))
-##    y=int(input("Enter the y coordinate "))
-##    i,j=conv_coord_to_row_col(x,y)
-##    map[i,j]=0
-##    return x,y,map
-##x,y,map1=get_initial_robcoord()
-##print("map1",map1,"x",x,"y",y)
-##def get_final_robcoord():
-##    map = np.ones((201,301),dtype=int)
-####    print(map)
-##    print("Please enter the x and y coordinates of the point robot")
-##    x=int(input("Enter the x coordinate "))
-##    y=int(input("Enter the y coordinate "))
-##    i,j=conv_coord_to_row_col(x,y)
-##    map[i,j]=0
-##    return x,y,map
-##u,v,map2=get_final_robcoord()
-##print("map2",map2,"u",u,"v",v)
-###############################RUNNING CODE DURING DEVELOPMENT###########00=90
+def get_initial_robcoord():
+    #map = np.ones((height,width),dtype=int)
+    map = draw_obstacles()
+##    print(map)
+    print("Please enter the x and y coordinates of the point robot.")
+    x=(input("Enter the x coordinate (default=50): "))
+    if x=='':  x=50
+    else:  x=int(x)
+    y=(input("Enter the y coordinate (default=125): "))
+    if y=='':  y=125
+    else:  y=int(y)
+    i,j=conv_coord_to_row_col(x,y)
+    map[i,j]=0
+    return x,y,map
+x,y,map1=get_initial_robcoord()
+print("map1",map1,"x",x,"y",y)
+
+def get_final_robcoord():
+    map = np.ones((height,width),dtype=int)
+    #map = draw_obstacles()
+##    print(map)
+    print("Please enter the x and y coordinates of the robot's goal.")
+    x=(input("Enter the x coordinate (default=150): "))
+    if x=='':  x=150
+    else:  x=int(x)
+    y=(input("Enter the y coordinate (default=100): "))
+    if y=='':  y=100
+    else:  y=int(y)
+    i,j=conv_coord_to_row_col(x,y)
+    map[i,j]=0
+    return x,y,map
+u,v,map2=get_final_robcoord()
+print("map2",map2,"u",u,"v",v)
+###############################RUNNING CODE DURING DEVELOPMENT###########
 ###############################COMMENT OUT WHEN AUTOMATED################
 
 
-x=21
-y=125
+#x=21
+#y=125
 #map1=np.ones((height,width),dtype=int)
-map1 = draw_obstacles()
-map1[y,x]=0
+#map1 = draw_obstacles()
+#map1[y,x]=0
+#map2=np.ones((height,width),dtype=int)
+#map2[5,7]=0
 
 textfile1=open("visualize.txt", "w")
 np.set_printoptions(threshold=np.inf)
+textfile1.write("MAP 1")
 textfile1.write(str(map1))
+textfile1.write("MAP 2")
+textfile1.write(str(map2))
 textfile1.close()
-
-map2=np.ones((height,width),dtype=int)
-map2[5,7]=0
 
 
 def get_robcoord(map):
@@ -159,7 +176,7 @@ def get_robcoord(map):
     return x,y
 ##x,y=get_robcoord(map)
 
-# Edit this to work with new map! ----
+# Edit this to work with new obstacles! ----
 def check_location(map):
     x,y=get_robcoord(map)
 ##    robcoord=[]
@@ -173,7 +190,7 @@ def check_location(map):
         return x,y,map
 x,y,map=check_location(map1)
 
-#  NOTE:  Need to handle obstacles here? -----
+
 def move_left(map):
     i,j=np.where(map==0)
     if j == 0:
@@ -183,7 +200,7 @@ def move_left(map):
         temp = temp_arr[i, j - 1]
         temp_arr[i,j] = temp
         temp_arr[i, j - 1] = 0
-        if check_location(temp_arr)== True:
+        if check_location(temp_arr) == True:
             return None
         else:
             return temp_arr
@@ -199,7 +216,7 @@ def move_right(map):
         temp = temp_arr[i, j + 1]
         temp_arr[i,j] = temp
         temp_arr[i, j +1] = 0
-        if check_location(temp_arr)== True:
+        if check_location(temp_arr) == True:
             return None
         else:
             return temp_arr
@@ -214,7 +231,7 @@ def move_up(map):
         temp = temp_arr[i-1, j]
         temp_arr[i,j] = temp
         temp_arr[i-1, j] = 0
-        if check_location(temp_arr)== True:
+        if check_location(temp_arr) == True:
             return None
         else:
             return temp_arr
@@ -229,7 +246,7 @@ def move_down(map):
         temp = temp_arr[i+1, j]
         temp_arr[i,j] = temp
         temp_arr[i+1, j] = 0
-        if check_location(temp_arr)== True:
+        if check_location(temp_arr) == True:
             return None
         else:
             return temp_arr
@@ -244,7 +261,7 @@ def move_left_up_diag(map):
         temp = temp_arr[i-1, j-1]
         temp_arr[i,j] = temp
         temp_arr[i-1, j-1] = 0
-        if check_location(temp_arr)== True:
+        if check_location(temp_arr) == True:
             return None
         else:
             return temp_arr
@@ -253,14 +270,14 @@ def move_left_up_diag(map):
 
 def move_left_down_diag(map):
     i,j=np.where(map ==0)
-    if i == 9 or j==0:
+    if i == height-1 or j==0:
         return None
     else:
         temp_arr = np.copy(map)
         temp = temp_arr[i+1, j-1]
         temp_arr[i,j] = temp
         temp_arr[i+1, j-1] = 0
-        if check_location(temp_arr)== True:
+        if check_location(temp_arr) == True:
             return None
         else:
             return temp_arr
@@ -269,14 +286,14 @@ def move_left_down_diag(map):
 ##
 def move_right_up_diag(map):
     i,j=np.where(map ==0)
-    if i==0 or y == 19:
+    if i==0 or j == width-1:
         return None
     else:
         temp_arr = np.copy(map)
         temp = temp_arr[i-1, j+1]
         temp_arr[i,j] = temp
         temp_arr[i-1, j+1] = 0
-        if check_location(temp_arr)== True:
+        if check_location(temp_arr) == True:
             return None
         else:
             return temp_arr
@@ -292,7 +309,7 @@ def move_right_down_diag(map):
         temp = temp_arr[i+1, j+1]
         temp_arr[i,j] = temp
         temp_arr[i+1, j+1] = 0
-        if check_location(temp_arr)== True:
+        if check_location(temp_arr) == True:
             return None
         else:
             return temp_arr
