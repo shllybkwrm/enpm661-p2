@@ -27,7 +27,7 @@ def display(img, title="", scale=250):
     cv2.imshow(title, resized)
     cv2.waitKey(1)  # in ms - adjust as needed for display speed
 
-    return;
+    return
 
 
 # Function for drawing current state of map
@@ -66,7 +66,7 @@ def draw_obstacles():
     #map_img = 255*np.array(map, np.uint8)
 
     # Draw obstacles - remember coords are (w,h)!
-    rect = ((95, height-30-10), (-75, -10), 30)
+    rect = ((95, height-30-10), (-75, -10), 30)  # top left, h/w, angle
     box = np.int0(cv2.boxPoints(rect))
     cv2.drawContours(map_img, [box], 0, obstacle_color, thickness=cv2.FILLED)
 
@@ -149,11 +149,11 @@ def get_final_robcoord():
     map = np.ones((height,width),dtype=int)
 ##    print(map)
     print("Please enter the x and y coordinates of the robot's goal.")
-    x=(input("Enter the x coordinate (default=150): "))
-    if x=='':  x=150
+    x=(input("Enter the x coordinate (default=125): "))
+    if x=='':  x=125
     else:  x=int(x)
-    y=(input("Enter the y coordinate (default=150): "))
-    if y=='':  y=150
+    y=(input("Enter the y coordinate (default=125): "))
+    if y=='':  y=125
     else:  y=int(y)
     i,j=conv_coord_to_row_col(x,y)
     map[i,j]=0
@@ -199,7 +199,8 @@ def check_location(map):
         return True
     if (x-16)**2+(y-5)**2 < 1.5**2:
         return True
-    if map[x,y]==OBJ:  # NEW - check for obstacle
+    i,j = conv_coord_to_row_col(x,y)
+    if sum(current_map[i,j])==OBJ*3:  # NEW - check for obstacle
         return True
     else:
 ##        robcoord=[x,y]
@@ -405,9 +406,9 @@ def exploring_nodes(node):
 
         for move in actions:
             temp_data = get_neighbours(move, current_root.map)
-            print(move, '\n', temp_data)
+            #print(move, '\n', temp_data)
             if temp_data is not None:
-                #draw_map(temp_data)  # don't draw here!
+                #draw_map(temp_data)  # don't draw here - not technically visited yet
 
                 node_counter += 1
                 print("node count",node_counter)
