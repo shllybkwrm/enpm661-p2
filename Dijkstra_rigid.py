@@ -217,10 +217,11 @@ def get_robcoord(map):
 def check_location(map):
     x,y=get_robcoord(map)
 ##    robcoord=[]
-    if 11>=x>=9 and 6>=y>=4:
-        return True
-    if (x-16)**2+(y-5)**2 < 1.5**2:
-        return True
+    # These are old / wrong
+    #if 11>=x>=9 and 6>=y>=4:
+    #    return True
+    #if (x-16)**2+(y-5)**2 < 1.5**2:
+    #    return True
     i,j = conv_coord_to_row_col(x,y)
     if sum(current_map[i,j])==OBJ*3:  # NEW - check for obstacle
         return True
@@ -236,10 +237,10 @@ def move_left(map):
     if j == 0:
         return None
     else:
-        temp_arr = np.copy(map)
-        temp = temp_arr[i, j - 1]
+        temp_arr = map.copy()
+        temp = temp_arr[i, j-radius]
         temp_arr[i,j] = temp
-        temp_arr[i, j - 1] = 0
+        temp_arr[i, j-radius] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -249,13 +250,13 @@ def move_left(map):
 ##
 def move_right(map):
     i,j=np.where(map==0)
-    if j == height-1:
+    if j == height-radius-1:
         return None
     else:
-        temp_arr = np.copy(map)
-        temp = temp_arr[i, j + 1]
+        temp_arr = map.copy()
+        temp = temp_arr[i, j+radius]
         temp_arr[i,j] = temp
-        temp_arr[i, j +1] = 0
+        temp_arr[i, j+radius] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -267,10 +268,10 @@ def move_up(map):
     if i == 0:
         return None
     else:
-        temp_arr = np.copy(map)
-        temp = temp_arr[i-1, j]
+        temp_arr = map.copy()
+        temp = temp_arr[i-radius, j]
         temp_arr[i,j] = temp
-        temp_arr[i-1, j] = 0
+        temp_arr[i-radius, j] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -279,13 +280,13 @@ def move_up(map):
 ##print("map",map)    
 def move_down(map):
     i,j=np.where(map==0)
-    if i == width-1:
+    if i == width-radius-1:
         return None
     else:
-        temp_arr = np.copy(map)
-        temp = temp_arr[i+1, j]
+        temp_arr = map.copy()
+        temp = temp_arr[i+radius, j]
         temp_arr[i,j] = temp
-        temp_arr[i+1, j] = 0
+        temp_arr[i+radius, j] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -297,10 +298,10 @@ def move_left_up_diag(map):
     if i==0 or j == 0:
         return None
     else:
-        temp_arr = np.copy(map)
-        temp = temp_arr[i-1, j-1]
+        temp_arr = map.copy()
+        temp = temp_arr[i-radius, j-radius]
         temp_arr[i,j] = temp
-        temp_arr[i-1, j-1] = 0
+        temp_arr[i-radius, j-radius] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -310,13 +311,13 @@ def move_left_up_diag(map):
 
 def move_left_down_diag(map):
     i,j=np.where(map==0)
-    if i == width-1 or j==0:
+    if i == width-radius-1 or j==0:
         return None
     else:
-        temp_arr = np.copy(map)
-        temp = temp_arr[i+1, j-1]
+        temp_arr = map.copy()
+        temp = temp_arr[i+radius, j-radius]
         temp_arr[i,j] = temp
-        temp_arr[i+1, j-1] = 0
+        temp_arr[i+radius, j-radius] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -326,13 +327,13 @@ def move_left_down_diag(map):
 ##
 def move_right_up_diag(map):
     i,j=np.where(map==0)
-    if i==0 or j == height-1:
+    if i==0 or j == height-radius-1:
         return None
     else:
-        temp_arr = np.copy(map)
-        temp = temp_arr[i-1, j+1]
+        temp_arr = map.copy()
+        temp = temp_arr[i-radius, j+radius]
         temp_arr[i,j] = temp
-        temp_arr[i-1, j+1] = 0
+        temp_arr[i-radius, j+radius] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -345,10 +346,10 @@ def move_right_down_diag(map):
     if j == 0:
         return None
     else:
-        temp_arr = np.copy(map)
-        temp = temp_arr[i+1, j+1]
+        temp_arr = map.copy()
+        temp = temp_arr[i+radius, j+radius]
         temp_arr[i,j] = temp
-        temp_arr[i+1, j+1] = 0
+        temp_arr[i+radius, j+radius] = 0
         if check_location(temp_arr) == True:
             return None
         else:
