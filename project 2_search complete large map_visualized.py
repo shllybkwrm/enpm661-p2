@@ -10,6 +10,8 @@ height = 200 #mask2.shape[0]
 width  = 300 #mask2.shape[1]
 # Create a white base image to draw map onto
 current_map = 255*np.ones((height, width, 3), np.uint8)
+# Create constant for obstacle color
+OBS = 84  # 1/3 gray
 
 
 # Old function for drawing mask
@@ -25,7 +27,7 @@ def draw_map(map):
         for (j,value) in enumerate(row):
             if value==0:
                 # Draw new robot location
-                current_map[i,j] = np.array([0,0,0], np.uint8);
+                current_map[i,j] = [0,0,0];
             #elif value<255:
             #    current_map[i,j] = np.array([128,128,128], np.uint8);
 
@@ -41,14 +43,14 @@ def draw_map(map):
     cv2.imshow('Current map', resized)
     cv2.waitKey(1)  # in ms - adjust as needed for display speed
 
-    return current_map
+    return cv2.cvtColor(current_map, cv2.COLOR_BGR2GRAY)
 
 # New function for using OpenCV built-in drawing functions
 def draw_obstacles():
     global height, width, current_map
     map_img = current_map.copy()
 
-    obstacle_color = (128,128,128)
+    obstacle_color = (OBS,OBS,OBS)
 
     # Convert dtype - only works for 0s & 1s
     #map_img = 255*np.array(map, np.uint8)
@@ -184,6 +186,8 @@ def check_location(map):
         return True
     if (x-16)**2+(y-5)**2 < 1.5**2:
         return True
+    if map[x,y]==OBS:  # NEW - check for obstacle
+        return True
     else:
 ##        robcoord=[x,y]
 ##        map[y,x]=0
@@ -253,7 +257,7 @@ def move_down(map):
 ##map=move_down(map)
 ##print("map",map) 
 def move_left_up_diag(map):
-    i,j=np.where(map ==0)
+    i,j=np.where(map==0)
     if i==0 or j == 0:
         return None
     else:
@@ -269,8 +273,8 @@ def move_left_up_diag(map):
 ##print("move_left_up_diag map",map)
 
 def move_left_down_diag(map):
-    i,j=np.where(map ==0)
-    if i == height-1 or j==0:
+    i,j=np.where(map==0)
+    if i == width-1 or j==0:
         return None
     else:
         temp_arr = np.copy(map)
@@ -285,8 +289,8 @@ def move_left_down_diag(map):
 ##print("move_left_down_diag map",map)
 ##
 def move_right_up_diag(map):
-    i,j=np.where(map ==0)
-    if i==0 or j == width-1:
+    i,j=np.where(map==0)
+    if i==0 or j == height-1:
         return None
     else:
         temp_arr = np.copy(map)
@@ -301,7 +305,7 @@ def move_right_up_diag(map):
 ##print(" move_right_up_diag map",map)
 
 def move_right_down_diag(map):
-    i,j=np.where(map ==0)
+    i,j=np.where(map==0)
     if j == 0:
         return None
     else:
