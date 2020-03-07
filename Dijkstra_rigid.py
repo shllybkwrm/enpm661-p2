@@ -37,8 +37,8 @@ def display(img, title="", scale=250):
 
 # Function to draw rigid robot as circle
 def draw_robot(i,j,c=(0,0,0)):
-    global radius
-    cv2.circle(current_map, center=(i,j), radius=radius, color=c, thickness=1)
+    global current_map, radius
+    cv2.circle(current_map, (i,j), radius, c, thickness=1)
     return
 
 
@@ -52,9 +52,9 @@ def draw_map(map):
     i,j=np.where(map==0)
     a,b=np.where(gray==0)
     #current_map[i,j] = [0,0,0];
-    draw_robot(i,j)
+    draw_robot(i[0],j[0])
     #current_map[a,b] = [128,128,128];  # half gray
-    draw_robot(a,b,c=(128,128,128))
+    draw_robot(a[0],b[0],c=(128,128,128))
     #for (i,row) in enumerate(map):
     #    for (j,value) in enumerate(row):
     #        if value==0:
@@ -71,7 +71,7 @@ def draw_map(map):
 
 # New function for using OpenCV built-in drawing functions
 def draw_obstacles():
-    global current_map, clearance
+    global current_map
     map_img = current_map.copy()
 
     obstacle_color = (OBJ,OBJ,OBJ)
@@ -84,8 +84,8 @@ def draw_obstacles():
     box = np.int0(cv2.boxPoints(rect))
     cv2.drawContours(map_img, [box], 0, obstacle_color, thickness=cv2.FILLED)
 
-    cv2.circle(map_img, center=(width-50,50), radius=25+clearance, color=obstacle_color, thickness=cv2.FILLED)
-    cv2.ellipse(map_img, center=(width//2,height//2), axes=(40+clearance,20+clearance), angle=0, startAngle=0, endAngle=360, color=obstacle_color, thickness=cv2.FILLED)
+    cv2.circle(map_img, center=(width-50,50), radius=25, color=obstacle_color, thickness=cv2.FILLED)
+    cv2.ellipse(map_img, center=(width//2,height//2), axes=(40,20), angle=0, startAngle=0, endAngle=360, color=obstacle_color, thickness=cv2.FILLED)
     # Top left object
     pts1 = np.array([[25, height-185], [75, height-185], [100,height-150], [75, height-120], [50, height-150] , [20, height-120]])
     pts1 = pts1.reshape((-1,1,2))
@@ -141,6 +141,7 @@ def row_col_to_conv_coord(i,j):
 ###############################This will get X AND Y COORDINATES OF START AND FINISH POINT FROM USER###########00=90
 ###############################COMMENT OUT WHEN FIXED################
 def get_initial_robcoord():
+    global radius, clearance
     #map = np.ones((height,width),dtype=int)
     map = draw_obstacles()
 ##    print(map)
@@ -148,15 +149,15 @@ def get_initial_robcoord():
     radius=(input("Enter the radius (default=2): "))
     if radius=='':  radius=2
     else:  radius=int(radius)
-    clearance=(input("Enter the obstacle clearance (default=same as entered radius): "))
-    if clearance=='':  clearance=radius
+    clearance=(input("Enter the obstacle clearance (default=2): "))
+    if clearance=='':  clearance=2
     else:  clearance=int(clearance)
-    print("Please enter the x and y coordinates of the point robot.")
-    x=(input("Enter the x coordinate (default=65): "))
-    if x=='':  x=65
+    print("Please enter the x and y coordinates of the robot.")
+    x=(input("Enter the x coordinate (default=50): "))
+    if x=='':  x=50
     else:  x=int(x)
-    y=(input("Enter the y coordinate (default=125): "))
-    if y=='':  y=125
+    y=(input("Enter the y coordinate (default=120): "))
+    if y=='':  y=120
     else:  y=int(y)
     i,j=conv_coord_to_row_col(x,y)
     map[i,j]=0
@@ -171,11 +172,11 @@ def get_final_robcoord():
     map = draw_obstacles()
 ##    print(map)
     print("Please enter the x and y coordinates of the robot's goal.")
-    x=(input("Enter the x coordinate (default=85): "))
-    if x=='':  x=85
+    x=(input("Enter the x coordinate (default=75): "))
+    if x=='':  x=75
     else:  x=int(x)
-    y=(input("Enter the y coordinate (default=120): "))
-    if y=='':  y=120
+    y=(input("Enter the y coordinate (default=80): "))
+    if y=='':  y=80
     else:  y=int(y)
     i,j=conv_coord_to_row_col(x,y)
     map[i,j]=0
@@ -215,15 +216,18 @@ def get_robcoord(map):
 
 # Edit this to work with new obstacles! ----
 def check_location(map):
+    c = radius + clearance # effective clearance
     x,y=get_robcoord(map)
-##    robcoord=[]
-    # These are old / wrong
-    #if 11>=x>=9 and 6>=y>=4:
-    #    return True
-    #if (x-16)**2+(y-5)**2 < 1.5**2:
-    #    return True
     i,j = conv_coord_to_row_col(x,y)
-    if sum(current_map[i,j])==OBJ*3:  # NEW - check for obstacle
+    # Check for obstacle within radius AND clearance
+    # There is probably a better way of doing this...
+    if sum(current_map[i,j])==OBJ*3: 
+        return True
+    if sum(current_map[i+c,j])==OBJ*3:
+        return True
+    if sum(current_map[i,j+c])==OBJ*3:
+        return True
+    if sum(current_map[i+c,j+c])==OBJ*3:
         return True
     else:
 ##        robcoord=[x,y]
@@ -477,6 +481,7 @@ def path(node):  # To find the path from the goal node to the starting node
     parent_node = node.parent
     i,j=np.where(parent_node.map==0)
     current_map[i,j] = [0,0,255]
+
     while parent_node is not None:
         p.append(parent_node)
         i,j=np.where(parent_node.map==0)
@@ -484,8 +489,8 @@ def path(node):  # To find the path from the goal node to the starting node
         parent_node = parent_node.parent
         
     current_map[i,j] = [255,0,0]
-    
     display(current_map, "Final map")
+
     return list(reversed(p))
 
 
