@@ -14,20 +14,23 @@ current_map = 255*np.ones((height, width, 3), np.uint8)
 OBS = 84  # 1/3 gray
 
 
-# Old function for drawing mask
+# Function for drawing current state of map
 def draw_map(map):
     global height, width, current_map
 
-    # Convert dtype - only works for 0s & 1s
-    #map_img = 255*np.array(map, np.uint8)
-    #map_img = 255*np.ones((height, width, 3), np.uint8)
+    # Convert to grayscale to flatten
+    gray = cv2.cvtColor(current_map, cv2.COLOR_BGR2GRAY)
 
-    # Draw new robot
-    for (i,row) in enumerate(map):
-        for (j,value) in enumerate(row):
-            if value==0:
-                # Draw new robot location
-                current_map[i,j] = [0,0,0];
+    # Get new robot location
+    i,j=np.where(map==0)
+    a,b=np.where(gray==0)
+    current_map[i,j] = [0,0,0];
+    current_map[a,b] = [128,128,128];  # half gray
+    #for (i,row) in enumerate(map):
+    #    for (j,value) in enumerate(row):
+    #        if value==0:
+    #            # Draw new robot location
+    #            current_map[i,j] = [0,0,0];
             #elif value<255:
             #    current_map[i,j] = np.array([128,128,128], np.uint8);
 
@@ -427,7 +430,7 @@ def exploring_nodes(node):
                             print("Dict1[k]",Dict1[k])
                             node_q.remove(Dict1[k])
                             node_q.insert(0,Dict1[k])
-                    print("THE LENGTH OF NODE Q after shuffling should be the same as after children IS: ", len(node_q))                   
+                    print("THE LENGTH OF NODE Q after shuffling (should be the same as after children) IS: ", len(node_q))                   
     return None, None, None  # return statement if the goal node is not reached
 
 def path(node):  # To find the path from the goal node to the starting node
@@ -465,14 +468,13 @@ Visit vertex closest to start node
 REPEAT UNTIL NO MORE IN LIST 2"""
 
 
-
-
-
 def print_states(list_final):  # To print the final states on the console
     print("printing final solution")
     for l in list_final:
         print("Move : " + str(l.act) + "\n" + "Result : " + "\n" + str(l.map) + "\t" + "node number:" + str(l.node_no))
     
+
+
 
 
 start_node=Node(0,map1,None,None,0)
