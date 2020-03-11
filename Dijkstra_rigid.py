@@ -38,7 +38,8 @@ def display(img, title="", scale=250):
 # Function to draw rigid robot as circle
 def draw_robot(i,j,c=(0,0,0)):
     global current_map, radius
-    cv2.circle(current_map, (i,j), radius, c, thickness=cv2.FILLED)
+    cv2.circle(current_map, (i,j), radius, c, thickness=1)
+    current_map[i,j] = list(c);
     return
 
 
@@ -53,7 +54,6 @@ def draw_map(map):
     a,b=np.where(gray==0)
     if i!=[] or j!=[]:
         draw_robot(i[0],j[0])
-        current_map[i,j] = [0,0,0];
     if a!=[] or b!=[]:
         draw_robot(a[0],b[0],c=(128,128,128))
     #current_map[a,b] = [128,128,128];  # half gray
