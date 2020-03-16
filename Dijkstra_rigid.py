@@ -18,6 +18,8 @@ OBJ = 84  # 1/3 gray
 radius = 0
 clearance = 0
 
+# NOTE:  Currently robot moves in step size = radius.  To change, search radius and change in movement functions & goal checking.
+
 
 def display(img, title="", scale=250):
     
@@ -38,7 +40,7 @@ def display(img, title="", scale=250):
 # Function to draw rigid robot as circle
 def draw_robot(i,j,c=(0,0,0)):
     global current_map, radius
-    cv2.circle(current_map, (i,j), radius, c, thickness=1)
+    cv2.circle(current_map, (j,i), radius, c, thickness=1)
     current_map[i,j] = list(c);
     return
 
@@ -48,14 +50,17 @@ def draw_map(map):
 
     # Convert to grayscale to flatten
     gray = cv2.cvtColor(current_map, cv2.COLOR_BGR2GRAY)
+    #display(gray, "gray conversion")
+    #cv2.waitKey(0)
 
     # Get new robot location
     i,j=np.where(map==0)
     a,b=np.where(gray==0)
-    if i!=[] or j!=[]:
+    if len(a)>0 or len(b)>0:
+        #draw_robot(a[0],b[0],c=(128,128,128))
+        current_map[a,b] = [128,128,128]
+    if len(i)>0 or len(j)>0:
         draw_robot(i[0],j[0])
-    if a!=[] or b!=[]:
-        draw_robot(a[0],b[0],c=(128,128,128))
     #current_map[a,b] = [128,128,128];  # half gray
     #for (i,row) in enumerate(map):
     #    for (j,value) in enumerate(row):
@@ -148,13 +153,13 @@ def get_initial_robcoord():
     map = draw_obstacles()
 ##    print(map)
     print("Please enter the rigid robot parameters.")
-    radius=(input("Enter the radius (default=2): "))
-    if radius=='':  radius=2
+    radius=(input("Enter the radius (default=3): "))
+    if radius=='':  radius=3
     else:  radius=int(radius)
     clearance=(input("Enter the obstacle clearance (default=2): "))
     if clearance=='':  clearance=2
     else:  clearance=int(clearance)
-    print("Please enter the x and y coordinates of the robot.")
+    print("\nPlease enter the x and y coordinates of the robot.")
     x=(input("Enter the x coordinate (default=50): "))
     if x=='':  x=50
     else:  x=int(x)
@@ -222,19 +227,20 @@ def check_location(map):
     x,y=get_robcoord(map)
     i,j = conv_coord_to_row_col(x,y)
     # Check for obstacle within radius AND clearance
-    # There is probably a better way of doing this...
-    if sum(current_map[i,j])==OBJ*3: 
-        return True
-    if sum(current_map[i+c,j])==OBJ*3:
-        return True
-    if sum(current_map[i,j+c])==OBJ*3:
-        return True
-    if sum(current_map[i+c,j+c])==OBJ*3:
-        return True
-    else:
+    for a in range(i-c,i+c):
+        for b in range(j-c,j+c):
+            if sum(current_map[a,b])==OBJ*3: 
+                return True
+    #elif sum(current_map[i+c,j])==OBJ*3:
+    #    return True
+    #elif sum(current_map[i,j+c])==OBJ*3:
+    #    return True
+    #elif sum(current_map[i+c,j+c])==OBJ*3:
+    #    return True
+    #else:
 ##        robcoord=[x,y]
 ##        map[y,x]=0
-        return x,y,map
+    return x,y,map
 x,y,map=check_location(map1)
 
 
@@ -244,9 +250,9 @@ def move_left(map):
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i, j - 1]
+        temp = temp_arr[i, j-radius]
         temp_arr[i,j] = temp
-        temp_arr[i, j - 1] = 0
+        temp_arr[i, j-radius] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -256,13 +262,13 @@ def move_left(map):
 ##
 def move_right(map):
     i,j=np.where(map==0)
-    if j == height-1:
+    if j == height-radius:
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i, j + 1]
+        temp = temp_arr[i, j+radius]
         temp_arr[i,j] = temp
-        temp_arr[i, j +1] = 0
+        temp_arr[i, j+radius] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -275,9 +281,9 @@ def move_up(map):
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i-1, j]
+        temp = temp_arr[i-radius, j]
         temp_arr[i,j] = temp
-        temp_arr[i-1, j] = 0
+        temp_arr[i-radius, j] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -286,13 +292,13 @@ def move_up(map):
 ##print("map",map)    
 def move_down(map):
     i,j=np.where(map==0)
-    if i == width-1:
+    if i == width-radius:
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i+1, j]
+        temp = temp_arr[i+radius, j]
         temp_arr[i,j] = temp
-        temp_arr[i+1, j] = 0
+        temp_arr[i+radius, j] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -305,57 +311,54 @@ def move_left_up_diag(map):
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i-1, j-1]
+        temp = temp_arr[i-radius, j-radius]
         temp_arr[i,j] = temp
-        temp_arr[i-1, j-1] = 0
+        temp_arr[i-radius, j-radius] = 0
         if check_location(temp_arr) == True:
             return None
         else:
             return temp_arr
 ##map=move_left_up_diag(map)
 ##print("move_left_up_diag map",map)
-
 def move_left_down_diag(map):
     i,j=np.where(map==0)
-    if i == width-1 or j==0:
+    if i == width-radius or j==0:
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i+1, j-1]
+        temp = temp_arr[i+radius, j-radius]
         temp_arr[i,j] = temp
-        temp_arr[i+1, j-1] = 0
+        temp_arr[i+radius, j-radius] = 0
         if check_location(temp_arr) == True:
             return None
         else:
             return temp_arr
 ##map=move_left_down_diag(map)
 ##print("move_left_down_diag map",map)
-##
 def move_right_up_diag(map):
     i,j=np.where(map==0)
-    if i==0 or j == height-1:
+    if i==0 or j == height-radius:
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i-1, j+1]
+        temp = temp_arr[i-radius, j+radius]
         temp_arr[i,j] = temp
-        temp_arr[i-1, j+1] = 0
+        temp_arr[i-radius, j+radius] = 0
         if check_location(temp_arr) == True:
             return None
         else:
             return temp_arr
 ##map=move_right_up_diag(map)
 ##print(" move_right_up_diag map",map)
-
 def move_right_down_diag(map):
     i,j=np.where(map==0)
-    if j == 0:
+    if i==width-radius or j == 0:
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i+1, j+1]
+        temp = temp_arr[i+radius, j+radius]
         temp_arr[i,j] = temp
-        temp_arr[i+1, j+1] = 0
+        temp_arr[i+radius, j+radius] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -428,7 +431,7 @@ def exploring_nodes(node):
     while node_q:
         current_root = node_q.pop(0)  # Pop the element 0 from the list
         i,j = np.where(current_root.map==0)
-        if i==goal_i and j==goal_j:
+        if i in range(goal_i[0]-radius, goal_i[0]+radius) and j in range(goal_j[0]-radius, goal_j[0]+radius):
             print("Goal reached!", '\n', current_root.map, current_root.node_no)
             draw_map(current_root.map)
 
@@ -477,7 +480,7 @@ def exploring_nodes(node):
                     #print("THE LENGTH OF NODE Q after shuffling (should be the same as after children) IS: ", len(node_q))                   
     return None, None, None  # return statement if the goal node is not reached
 
-def path(node):  # To find the path from the goal node to the starting node
+def find_path(node):  # To find the path from the goal node to the starting node
     p = []  # Empty list
     p.append(node)
     parent_node = node.parent
@@ -532,7 +535,7 @@ def print_states(list_final):  # To print the final states on the console
 start_time = time.time()
 start_node=Node(0,map1,None,None,0)
 goal, s, v = exploring_nodes(start_node)
-print_states(path(goal))
+print_states(find_path(goal))
 end_time = time.time()
 print("Total execution time:", end_time-start_time)
 ##print(move_left(start_node.node_loc))
