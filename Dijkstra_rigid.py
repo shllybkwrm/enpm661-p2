@@ -14,11 +14,12 @@ current_map = 255*np.ones((height, width, 3), np.uint8)
 # Create constant for obstacle color
 OBJ = 84  # 1/3 gray
 
-# Rigid robot parameters
-radius = 0
+# Rigid robot parameters - will be overwritten by user input
+radius = 1
 clearance = 0
+step = 1
 
-# NOTE:  Currently robot moves in step size = radius.  To change, search radius and change in movement functions & goal checking.
+# NOTE:  By default robot moves in step size = radius.  To change, input a different number during user prompts.
 
 
 def display(img, title="", scale=250):
@@ -148,24 +149,28 @@ def row_col_to_conv_coord(i,j):
 ###############################This will get X AND Y COORDINATES OF START AND FINISH POINT FROM USER###########00=90
 ###############################COMMENT OUT WHEN FIXED################
 def get_initial_robcoord():
-    global radius, clearance
+    global radius, clearance, step
     #map = np.ones((height,width),dtype=int)
     map = draw_obstacles()
 ##    print(map)
     print("Please enter the rigid robot parameters.")
-    radius=(input("Enter the radius (default=3): "))
-    if radius=='':  radius=3
-    else:  radius=int(radius)
-    clearance=(input("Enter the obstacle clearance (default=2): "))
-    if clearance=='':  clearance=2
-    else:  clearance=int(clearance)
+    ans=(input("Enter the radius (default=3): "))
+    if ans=='':  radius=3
+    else:  radius=int(ans)
+    ans=(input("Enter the obstacle clearance (default=2): "))
+    if ans=='':  clearance=2
+    else:  clearance=int(ans)
+    ans=(input("Enter the robot step size (default=radius): "))
+    if ans=='':  step=radius
+    else:  step=int(ans)
+
     print("\nPlease enter the x and y coordinates of the robot.")
-    x=(input("Enter the x coordinate (default=50): "))
-    if x=='':  x=50
-    else:  x=int(x)
-    y=(input("Enter the y coordinate (default=120): "))
-    if y=='':  y=120
-    else:  y=int(y)
+    ans=(input("Enter the x coordinate (default=50): "))
+    if ans=='':  x=50
+    else:  x=int(ans)
+    ans=(input("Enter the y coordinate (default=120): "))
+    if ans=='':  y=120
+    else:  y=int(ans)
     i,j=conv_coord_to_row_col(x,y)
     map[i,j]=0
     # Color start blue for visualization
@@ -179,12 +184,12 @@ def get_final_robcoord():
     map = draw_obstacles()
 ##    print(map)
     print("Please enter the x and y coordinates of the robot's goal.")
-    x=(input("Enter the x coordinate (default=75): "))
-    if x=='':  x=75
-    else:  x=int(x)
-    y=(input("Enter the y coordinate (default=80): "))
-    if y=='':  y=80
-    else:  y=int(y)
+    ans=(input("Enter the x coordinate (default=75): "))
+    if ans=='':  x=75
+    else:  x=int(ans)
+    ans=(input("Enter the y coordinate (default=80): "))
+    if ans=='':  y=80
+    else:  y=int(ans)
     i,j=conv_coord_to_row_col(x,y)
     map[i,j]=0
     # Color goal red for visualization
@@ -250,9 +255,9 @@ def move_left(map):
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i, j-radius]
+        temp = temp_arr[i, j-step]
         temp_arr[i,j] = temp
-        temp_arr[i, j-radius] = 0
+        temp_arr[i, j-step] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -262,13 +267,13 @@ def move_left(map):
 ##
 def move_right(map):
     i,j=np.where(map==0)
-    if j == height-radius:
+    if j == height-step:
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i, j+radius]
+        temp = temp_arr[i, j+step]
         temp_arr[i,j] = temp
-        temp_arr[i, j+radius] = 0
+        temp_arr[i, j+step] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -281,9 +286,9 @@ def move_up(map):
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i-radius, j]
+        temp = temp_arr[i-step, j]
         temp_arr[i,j] = temp
-        temp_arr[i-radius, j] = 0
+        temp_arr[i-step, j] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -292,13 +297,13 @@ def move_up(map):
 ##print("map",map)    
 def move_down(map):
     i,j=np.where(map==0)
-    if i == width-radius:
+    if i == width-step:
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i+radius, j]
+        temp = temp_arr[i+step, j]
         temp_arr[i,j] = temp
-        temp_arr[i+radius, j] = 0
+        temp_arr[i+step, j] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -311,9 +316,9 @@ def move_left_up_diag(map):
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i-radius, j-radius]
+        temp = temp_arr[i-step, j-step]
         temp_arr[i,j] = temp
-        temp_arr[i-radius, j-radius] = 0
+        temp_arr[i-step, j-step] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -322,13 +327,13 @@ def move_left_up_diag(map):
 ##print("move_left_up_diag map",map)
 def move_left_down_diag(map):
     i,j=np.where(map==0)
-    if i == width-radius or j==0:
+    if i == width-step or j==0:
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i+radius, j-radius]
+        temp = temp_arr[i+step, j-step]
         temp_arr[i,j] = temp
-        temp_arr[i+radius, j-radius] = 0
+        temp_arr[i+step, j-step] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -337,13 +342,13 @@ def move_left_down_diag(map):
 ##print("move_left_down_diag map",map)
 def move_right_up_diag(map):
     i,j=np.where(map==0)
-    if i==0 or j == height-radius:
+    if i==0 or j == height-step:
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i-radius, j+radius]
+        temp = temp_arr[i-step, j+step]
         temp_arr[i,j] = temp
-        temp_arr[i-radius, j+radius] = 0
+        temp_arr[i-step, j+step] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -352,13 +357,13 @@ def move_right_up_diag(map):
 ##print(" move_right_up_diag map",map)
 def move_right_down_diag(map):
     i,j=np.where(map==0)
-    if i==width-radius or j == 0:
+    if i==width-step or j == 0:
         return None
     else:
         temp_arr = np.copy(map)
-        temp = temp_arr[i+radius, j+radius]
+        temp = temp_arr[i+step, j+step]
         temp_arr[i,j] = temp
-        temp_arr[i+radius, j+radius] = 0
+        temp_arr[i+step, j+step] = 0
         if check_location(temp_arr) == True:
             return None
         else:
@@ -431,7 +436,7 @@ def exploring_nodes(node):
     while node_q:
         current_root = node_q.pop(0)  # Pop the element 0 from the list
         i,j = np.where(current_root.map==0)
-        if i in range(goal_i[0]-radius, goal_i[0]+radius) and j in range(goal_j[0]-radius, goal_j[0]+radius):
+        if i in range(goal_i[0]-step, goal_i[0]+step) and j in range(goal_j[0]-step, goal_j[0]+step):
             print("Goal reached!", '\n', current_root.map, current_root.node_no)
             draw_map(current_root.map)
 
